@@ -3,5 +3,6 @@ type Tasks = {
   title: string;
   description: string;
   created_at: number;
+  updated_at: number;
   closed_at: number;
 };

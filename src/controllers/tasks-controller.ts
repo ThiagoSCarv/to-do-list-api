@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, raw, Request, Response } from "express";
 import { AppError } from "@/utils/app-error";
 import { knex } from "@/database/knex";
 import { z } from "zod";
@@ -26,6 +26,20 @@ class TasksController {
 
   async index(request: Request, response: Response, next: NextFunction) {
     try {
+      const { status } = request.query;
+
+      if(status === "open") {
+        const tasks = await knex<Tasks>("tasks").select().whereNull("closed_at");
+
+        return response.json(tasks);
+      }
+
+      if(status === "close") {
+        const tasks = await knex<Tasks>("tasks").select().whereNotNull("closed_at");
+
+        return response.json(tasks);
+      }
+
       const tasks = await knex<Tasks>("tasks").select().orderBy("closed_at");
 
       return response.json(tasks);

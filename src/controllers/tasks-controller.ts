@@ -27,21 +27,17 @@ class TasksController {
   async index(request: Request, response: Response, next: NextFunction) {
     try {
       const { status } = request.query;
+      const query = knex<Tasks>("tasks").select();
 
-      if(status === "open") {
-        const tasks = await knex<Tasks>("tasks").select().whereNull("closed_at");
-
-        return response.json(tasks);
+      if (status === "open") {
+        query.whereNull("closed_at");
+      } else if (status === "close") {
+        query.whereNotNull("closed_at");
+      } else {
+        query.orderBy("closed_at");
       }
 
-      if(status === "close") {
-        const tasks = await knex<Tasks>("tasks").select().whereNotNull("closed_at");
-
-        return response.json(tasks);
-      }
-
-      const tasks = await knex<Tasks>("tasks").select().orderBy("closed_at");
-
+      const tasks = await query;
       return response.json(tasks);
     } catch (error) {
       next(error);
